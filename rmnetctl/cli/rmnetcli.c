@@ -29,6 +29,11 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+Changes from Qualcomm Innovation Center are provided under the following license:
+
+  Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+  SPDX-License-Identifier: BSD-3-Clause-Clear
+
 ******************************************************************************/
 
 /******************************************************************************
@@ -60,7 +65,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define _RMNETCLI_CHECKNULL(X)		do { if (!X) {                         \
 print_rmnet_api_status(RMNETCTL_INVALID_ARG, RMNETCTL_CFG_FAILURE_NO_COMMAND); \
-				rmnetctl_cleanup(handle);                      \
+				rtrmnet_ctl_deinit(handle);                      \
 				return RMNETCTL_INVALID_ARG;                   \
 		} } while (0);
 #define _STRTOUI32(X)           (uint32_t)strtoul(X, NULL, 0)
@@ -92,129 +97,27 @@ static void rmnet_api_usage(void)
 	printf("RmNet API Usage:\n\n");
 	printf("rmnetcli help                            Displays this help\n");
 	printf("\n");
-	printf("rmnetcli assocnetdev <dev_name>          Registers the RmNet");
-	printf(_5TABS" data driver on a particular");
-	printf(_5TABS" device.dev_name cannot");
-	printf(_5TABS" be larger than 15");
-	printf(_5TABS" characters. Returns");
-	printf(_5TABS" the status code.\n\n");
-	printf("rmnetcli unassocnetdev <dev_name>        Unregisters the");
-	printf(_5TABS" RmNet data driver on a particular");
-	printf(_5TABS" device. dev_name cannot");
-	printf(_5TABS" be larger than 15");
-	printf(_5TABS" characters. Returns");
-	printf(_5TABS" the status code.\n\n");
-	printf("rmnetcli getnetdevassoc <dev_name>       Get if the RmNet");
-	printf(_5TABS" data driver is registered on");
-	printf(_5TABS" a particular device.");
-	printf(_5TABS" dev_name cannot be");
-	printf(_5TABS" larger than 15");
-	printf(_5TABS" characters. Returns 1");
-	printf(_5TABS" if is registered and");
-	printf(_5TABS" 0 if it is not");
-	printf(_5TABS" registered\n\n");
-	printf("rmnetcli setledf <egress_flags>          Sets the egress data");
-	printf(_2TABS" <agg_size>              format for a particular link.");
-	printf(_2TABS" <agg_count>             dev_name cannot be larger");
-	printf(_2TABS" <dev_name>              than 15 characters.");
-	printf(_5TABS" Returns the status code\n\n");
-	printf("rmnetcli getledf <dev_name>              Gets the egress data");
-	printf(_5TABS" format for a particular link.");
-	printf(_5TABS" dev_name cannot be larger");
-	printf(_5TABS" than 15. Returns the 4");
-	printf(_5TABS" byte unsigned integer");
-	printf(_5TABS" egress_flags\n\n");
-	printf("rmnetcli setlidf <ingress_flags>         Sets the ingress");
-	printf(_2TABS" <tail_spacing>          data format for a particular");
-	printf(_2TABS" <dev_name>              link. ingress_flags is 4");
-	printf(_5TABS" byte unsigned integer.");
-	printf(_5TABS" tail_spacing is a one.");
-	printf(_5TABS" byte unsigned integer.");
-	printf(_5TABS" dev_name cannot be");
-	printf(_5TABS" larger than 15.");
-	printf(_5TABS" characters. Returns");
-	printf(_5TABS" the status code\n\n");
-	printf("rmnetcli getlidf <dev_name>              Gets the ingress");
-	printf(_5TABS" data format for a particular");
-	printf(_5TABS" link. dev_name cannot be");
-	printf(_5TABS" larger than 15. Returns");
-	printf(_5TABS" the 4 byte unsigned");
-	printf(_5TABS" integer ingress_flags\n\n");
-	printf("rmnetcli setlepc <logical_ep_id>         Sets the logical");
-	printf(_2TABS" <rmnet_mode>            endpoint configuration for");
-	printf(_2TABS" <dev_name>              a particular link.");
-	printf(_2TABS" <egress_dev_name>       logical_ep_id are 32bit");
-	printf(_5TABS" integers from -1 to 31.");
-	printf(_5TABS" rmnet_mode is a 1 byte");
-	printf(_5TABS" unsigned integer of");
-	printf(_5TABS" value none, vnd or");
-	printf(_5TABS" bridged. dev_name");
-	printf(_5TABS" and egress_dev_name");
-	printf(_5TABS" cannot be larger");
-	printf(_5TABS" than 15 characters");
-	printf(_5TABS" Returns the status code\n\n");
-	printf("rmnetcli unsetlepc <logical_ep_id>       Un-sets the logical");
-	printf(_2TABS"  <dev_name>              endpoint configuration for");
-	printf(_5TABS" a particular link.");
-	printf(_5TABS" integers from -1 to 31.");
-	printf(_5TABS" dev_name cannot be larger");
-	printf(_5TABS" than 15 characters");
-	printf(_5TABS" Returns the status code\n\n");
-	printf("rmnetcli getlepc <logical_ep_id>         Sets the logical");
-	printf(_2TABS" <dev_name>              endpoint configuration for a");
-	printf(_5TABS" particular link.");
-	printf(_5TABS" logical_ep_id are 32bit");
-	printf(_5TABS" integers from -1 to 31.");
-	printf(_5TABS" Returns the rmnet_mode");
-	printf(_5TABS" and egress_dev_name.");
-	printf(_5TABS" rmnet_mode is a 1");
-	printf(_5TABS" byte unsigned integer");
-	printf(_5TABS" of value none, vnd or");
-	printf(_5TABS" bridged. dev_name and");
-	printf(_5TABS" egress_dev_name cannot be");
-	printf(_5TABS" larger than 15 ");
-	printf(_5TABS" characters. Returns the");
-	printf(_5TABS" status code\n\n");
-	printf("rmnetcli newvnd <dev_id>                 Creates a new");
-	printf(_5TABS" virtual network device node.");
-	printf(_5TABS" dev_id is an int");
-	printf(_5TABS" less than 32. Returns");
-	printf(_5TABS" the status code\n\n");
-	printf("rmnetcli newvndprefix <dev_id> <name_prefix>   Creates");
-	printf(_5TABS" virtual network device node.");
-	printf(_5TABS" dev_id is an int");
-	printf(_5TABS" less than 32. Prefix");
-	printf(_5TABS" must be less than");
-	printf(_5TABS" 15 chars. Returns");
-	printf(_5TABS" the status code\n\n");
-	printf("rmnetcli getvndname <dev_id>              Get name of");
-	printf(_5TABS" network device node from id\n\n");
-	printf("rmnetcli freevnd <dev_id>              Removes virtual");
-	printf(_5TABS" network device node. dev_name");
-	printf(_5TABS" cannot be larger than 15.");
-	printf(_5TABS" Returns the status code\n\n");
-	printf("rmnetcli addvnctcflow <dev_id>            Add a modem flow");
-	printf(_2TABS" <mdm_flow_hndl>         handle - tc flow handle");
-	printf(_2TABS" <tc_flow_hndl>          mapping for a virtual network");
-	printf(_2TABS" device node\n\n");
-	printf("rmnetcli delvnctcflow <dev_id>            Delete a modem flow");
-	printf(_2TABS" <mdm_flow_hndl>         handle - tc flow handle");
-	printf(_2TABS" <tc_flow_hndl>          mapping for a virtual network");
-	printf(_2TABS" device node\n\n");
 	printf("**************************\n");
 	printf("RmNet RTM_NETLINK API Usage:\n\n");
-	printf("rmnetcli -n newlink  <dev_id>            Add a vnd w/ newlink");
+	printf("rmnetcli -n newlink  <real_dev>            Add a vnd w/ newlink");
 	printf(_2TABS" <vnd>                   string - vnd device_name");
 	printf(_2TABS" <vnd id>                int - new vnd id");
 	printf(_2TABS" [flags]                 int - starting flag config\n\n");
-	printf("rmnetcli -n changelink  <dev_id>         Change a vnd's flags");
+	printf("rmnetcli -n changelink  <real_dev>         Change a vnd's flags");
 	printf(_2TABS" <vnd>                   string - vnd device_name");
 	printf(_2TABS" <vnd id>                int - new vnd id");
 	printf(_2TABS" <flags>                 int - new flag config\n\n");
-	printf("rmnetcli -n dellink <dev_name>           Delete a vnd");
+	printf("rmnetcli -n getlink <real_dev>           Get device config\n\n");
+	printf("rmnetcli -n dellink <real_dev>           Delete a vnd");
 	printf(_2TABS"                         by inputting dev name\n\n");
-	printf("rmnetcli -n bridgelink  <dev_name>       Bridge a vnd and a dev");
+	printf("rmnetcli -n bridgelink  <real_dev>       Bridge a vnd and a dev");
 	printf(_2TABS" <vnd id>                by specifying dev id and vnd id\n\n");
+	printf("rmnetcli -n uplinkparam <real_dev>   set uplink aggregation parameters");
+	printf(_2TABS" <vnd id>                string - vnd device_name");
+	printf(_2TABS" <packet count>          int - maximum packet count");
+	printf(_2TABS" <byte count>            int - maximum byte count");
+	printf(_2TABS" <time limit>            int - maximum time limit");
+	printf(_2TABS" <features>              int - aggregation features\n\n");
 	printf("rmnetcli -n flowactivate <real dev>  activate a flow\n");
 	printf(_2TABS" <vnd_name>              string - vnd device name\n\n");
 	printf(_2TABS" <bearer_id>             int - bearer id\n\n");
@@ -430,132 +333,9 @@ static int rmnet_api_call(int argc, char *argv[])
 
 
 		goto end;
-	} else {
-		return_code = rmnetctl_init(&handle, &error_number);
-		if (return_code != RMNETCTL_SUCCESS) {
-			print_rmnet_api_status(return_code, error_number);
-			return RMNETCTL_LIB_ERR;
-		}
-
-	}
-	error_number = RMNETCTL_CFG_FAILURE_NO_COMMAND;
-	return_code = RMNETCTL_LIB_ERR;
-	if (!strcmp(*argv, "assocnetdev")) {
-		return_code = rmnet_associate_network_device(handle,
-		argv[1], &error_number, RMNETCTL_DEVICE_ASSOCIATE);
-	} else if (!strcmp(*argv, "unassocnetdev")) {
-		return_code = rmnet_associate_network_device(handle,
-		argv[1], &error_number, RMNETCTL_DEVICE_UNASSOCIATE);
-	} else if (!strcmp(*argv, "getnetdevassoc")) {
-		int register_status;
-		return_code = rmnet_get_network_device_associated(handle,
-		argv[1], &register_status, &error_number);
-		if (return_code == RMNETCTL_SUCCESS)
-			printf("register_status is %d\n", register_status);
-	} else if (!strcmp(*argv, "getledf")) {
-		uint32_t egress_flags;
-		uint16_t agg_size, agg_count;
-		return_code = rmnet_get_link_egress_data_format(handle,
-		argv[1], &egress_flags, &agg_size, &agg_count, &error_number);
-		if (return_code == RMNETCTL_SUCCESS) {
-			printf("egress_flags is %u\n", egress_flags);
-			printf("agg_size is %u\n", agg_size);
-			printf("agg_count is %u\n", agg_count);
-		}
-	} else if (!strcmp(*argv, "getlidf")) {
-		uint32_t ingress_flags;
-		uint8_t  tail_spacing;
-		return_code = rmnet_get_link_ingress_data_format_tailspace(
-		handle, argv[1], &ingress_flags, &tail_spacing, &error_number);
-		if (return_code == RMNETCTL_SUCCESS) {
-			printf("ingress_flags is %u\n", ingress_flags);
-			printf("tail_spacing is %u\n", tail_spacing);
-		}
-	} else if (!strcmp(*argv, "newvndprefix")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		_RMNETCLI_CHECKNULL(argv[2]);
-		return_code = rmnet_new_vnd_prefix(handle,
-		_STRTOUI32(argv[1]), &error_number, RMNETCTL_NEW_VND, argv[2]);
-	} else if (!strcmp(*argv, "newvnd")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		return_code = rmnet_new_vnd(handle,
-		_STRTOUI32(argv[1]), &error_number, RMNETCTL_NEW_VND);
-	} else if (!strcmp(*argv, "getvndname")) {
-		char buffer[32];
-		memset(buffer, 0, 32);
-		_RMNETCLI_CHECKNULL(argv[1]);
-		return_code = rmnet_get_vnd_name(handle, _STRTOUI32(argv[1]),
-			           &error_number, buffer, 32);
-		if (return_code == RMNETCTL_SUCCESS) {
-			printf("VND name: %s\n", buffer);
-		}
-	} else if (!strcmp(*argv, "freevnd")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		return_code = rmnet_new_vnd(handle,
-		_STRTOUI32(argv[1]), &error_number, RMNETCTL_FREE_VND);
-	} else if (!strcmp(*argv, "setlidf")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		_RMNETCLI_CHECKNULL(argv[2]);
-		_RMNETCLI_CHECKNULL(argv[3]);
-		return_code = rmnet_set_link_ingress_data_format_tailspace(
-		handle, _STRTOUI32(argv[1]), _STRTOUI8(argv[2]), argv[3],
-		&error_number);
-	} else if (!strcmp(*argv, "delvnctcflow")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		_RMNETCLI_CHECKNULL(argv[2]);
-		_RMNETCLI_CHECKNULL(argv[3]);
-		return_code = rmnet_add_del_vnd_tc_flow(handle,
-		_STRTOUI32(argv[1]), _STRTOUI32(argv[2]), _STRTOUI32(argv[3]),
-		RMNETCTL_DEL_FLOW, &error_number);
-	} else if (!strcmp(*argv, "getlepc")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		uint8_t rmnet_mode;
-		char *egress_dev_name;
-		egress_dev_name = NULL;
-		egress_dev_name = (char *)malloc(RMNET_MAX_STR_LEN
-		* sizeof(char));
-		if (!egress_dev_name) {
-			print_rmnet_api_status(RMNETCTL_LIB_ERR,
-			RMNETCTL_CFG_FAILURE_EGRESS_DEV_NAME_NULL);
-			rmnetctl_cleanup(handle);
-			return RMNETCTL_LIB_ERR;
-		}
-		return_code = rmnet_get_logical_ep_config(handle,
-		_STRTOI32(argv[1]), argv[2], &rmnet_mode,
-		&egress_dev_name, RMNET_MAX_STR_LEN, &error_number);
-		if (return_code == RMNETCTL_SUCCESS) {
-			printf("rmnet_mode is %u\n", rmnet_mode);
-			printf("egress_dev_name is %s\n", egress_dev_name);
-		}
-		free(egress_dev_name);
-	} else if (!strcmp(*argv, "addvnctcflow")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		_RMNETCLI_CHECKNULL(argv[2]);
-		_RMNETCLI_CHECKNULL(argv[3]);
-		return_code = rmnet_add_del_vnd_tc_flow(handle,
-		_STRTOUI32(argv[1]), _STRTOUI32(argv[2]), _STRTOUI32(argv[3]),
-		RMNETCTL_ADD_FLOW, &error_number);
-	} else if (!strcmp(*argv, "setledf")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		_RMNETCLI_CHECKNULL(argv[2]);
-		_RMNETCLI_CHECKNULL(argv[3]);
-		return_code = rmnet_set_link_egress_data_format(handle,
-		_STRTOUI32(argv[1]), _STRTOUI16(argv[2]), _STRTOUI16(argv[3]),
-		argv[4], &error_number);
-	} else if (!strcmp(*argv, "setlepc")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		_RMNETCLI_CHECKNULL(argv[2]);
-		return_code = rmnet_set_logical_ep_config(handle,
-		_STRTOI32(argv[1]), _STRTOUI8(argv[2]), argv[3], argv[4],
-		&error_number);
-	} else if (!strcmp(*argv, "unsetlepc")) {
-		_RMNETCLI_CHECKNULL(argv[1]);
-		return_code = rmnet_unset_logical_ep_config(handle,
-		_STRTOI32(argv[1]), argv[2], &error_number);
 	}
 end:
 	print_rmnet_api_status(return_code, error_number);
-	rmnetctl_cleanup(handle);
 	rtrmnet_ctl_deinit(handle);
 	return return_code;
 }

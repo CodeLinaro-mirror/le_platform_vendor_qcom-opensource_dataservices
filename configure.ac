@@ -38,7 +38,7 @@ fi
 AM_CONDITIONAL(USE_GLIB, test "x${with_glib}" = "xyes")
 
 # Checks for header files.
-AC_CHECK_HEADERS([sys/socket.h stdint.h linux/netlink.h string.h stdio.h unistd.h stdlib.h linux/rmnet_data.h])
+AC_CHECK_HEADERS([sys/socket.h stdint.h linux/netlink.h string.h stdio.h unistd.h stdlib.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
